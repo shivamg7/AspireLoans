@@ -1,5 +1,6 @@
 import pytest as pytest
-from app.utils.utils import check_password, get_hashed_password
+
+from app.auth.auth import get_hashed_password, verify_password
 
 
 def test_get_hashed_password() -> None:
@@ -30,5 +31,5 @@ def test_get_hashed_password() -> None:
 )
 def test_check_password(a: str, b: str, expected: bool):
     """Test check_password"""
-    actual = check_password(a, b)
+    actual = verify_password(a, b)
     assert expected == actual
