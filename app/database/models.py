@@ -22,12 +22,12 @@ class User(Base):
     Model for user
     """
     id = Column(Integer, primary_key=True)
-    username = Column(String)
+    username = Column(String, unique=True)
     hashed_password = Column(String)
 
     loans = relationship("Loan", back_populates="user")
 
-    __tablename__ = "user"
+    __tablename__ = "user" # #
 
 
 class Loan(Base):
@@ -46,6 +46,8 @@ class Loan(Base):
 
     user = relationship("User", back_populates="loans")
 
+    loan_payments = relationship("LoanPayment", back_populates="loan")
+
     __tablename__ = "loan"
 
 
@@ -54,7 +56,7 @@ class LoanPayment(Base):
     Model for Loan payment schedule
     """
     id = Column(Integer, primary_key=True)
-    load_id = Column(Integer, ForeignKey(
+    loan_id = Column(Integer, ForeignKey(
         "loan.id",
         ondelete="CASCADE",
         onupdate="CASCADE"
@@ -62,5 +64,7 @@ class LoanPayment(Base):
     amount = Column(Float)
     payment_schedule = Column(DateTime)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.pending)
+
+    loan = relationship("Loan", back_populates="loan_payments")
 
     __tablename__ = "loan_payment"

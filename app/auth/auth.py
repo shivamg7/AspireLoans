@@ -1,14 +1,13 @@
 import os
 from datetime import timedelta, datetime
-from typing import Union, Annotated, Dict
+from typing import Union
 
-from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import jwt
 from passlib.context import CryptContext
-from starlette import status
 
-from app.database.fake_db import fake_users_db
+from app.database.crud import CrudMixin
+from app.database.dependencies import get_db_session_context
 from app.models.models import UserInDB, TokenData, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,14 +39,14 @@ def verify_password(plain_text_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_text_password, hashed_password)
 
 
-def get_user(db, username: str):
-    if username in db.db:
-        user_dict = db.db[username]
-        return UserInDB(**user_dict)
+def get_user(username: str):
+    with get_db_session_context() as db:
+        user = CrudMixin.get_user(db, username)
+    return UserInDB(**{"username": user.username, "hashed_password": user.hashed_password})
 
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -73,10 +72,12 @@ def create_user(username: str, password: str) -> None:
     :param password:
     :return:
     """
-    fake_users_db.db[username] = {
-        "username": username,
-        "hashed_password": get_hashed_password(password)
-    }
+    with get_db_session_context() as db:
+        user_exists = CrudMixin.get_user(db, username)
+        if user_exists:
+            return
+        CrudMixin.create_user(db=db, username=username, hashed_password=get_hashed_password(password))
+        db.commit()
 
 
 def init_fake_users_db() -> None:

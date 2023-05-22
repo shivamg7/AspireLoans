@@ -5,7 +5,6 @@ from jose import jwt, JWTError
 from starlette import status
 
 from app.auth.auth import oauth2_scheme, SECRET_KEY, ALGORITHM, get_user
-from app.database.fake_db import fake_users_db
 from app.models.models import TokenData
 
 
@@ -23,7 +22,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
