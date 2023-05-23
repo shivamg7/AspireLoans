@@ -1,5 +1,5 @@
 import datetime
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel, validator
 from pydantic.datetime_parse import parse_date, get_numeric
@@ -35,9 +35,23 @@ class Loan(BaseModel):
             raise ValueError("tenure must be less than 36 months")
         return tenure
 
+class LoanPaymentResponse(BaseModel):
+    """"""
+    amount: float
+    schedule: str
+    status: str
+
 
 class LoanResponse(BaseModel):
     """Pydantic model for Loan response body"""
     amount: float
     tenure: int
     loan_id: int
+    status: str
+    payments: List[LoanPaymentResponse]
+
+
+class LoanPaymentRequest(BaseModel):
+    """"""
+    amount: float
+    schedule: StrictDate

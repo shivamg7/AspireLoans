@@ -16,7 +16,7 @@ from app.models.schema import Loan
 logger = logging.getLogger()
 
 
-def create_loan(username: str, loan: Loan):
+def create_loan(username: str, loan: Loan) -> None:
     """
     Create a loan record in DB.
 
@@ -44,7 +44,7 @@ def create_loan(username: str, loan: Loan):
             raise HTTPException(status_code=500, detail="something went wrong")
 
 
-def approve_loan(loan_id: int):
+def approve_loan(loan_id: int) -> None:
     """
     Approve a loan record in DB.
 
@@ -65,39 +65,65 @@ def approve_loan(loan_id: int):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="something went wrong")
 
 
-def make_payment(loan: Loan, amount: float):
+def make_payment(loan_id: int, schedule: str) -> None:
     """
 
-    :param username:
-    :param loan:
+    :param loan_id:
+    :param schedule:
     :return:
     """
-    pass
+    with get_db_session_context() as db:
+        try:
+            loan_payment = CrudMixin.get_loan_payment(db, loan_id, schedule)
+            loan_payment.status = models.PaymentStatus.paid
+            db.add(loan_payment)
+            db.flush()
+            pending_payments = CrudMixin.get_pending_payments(db, loan_id)
+            if not pending_payments:
+                loan = CrudMixin.get_loan(db, loan_id)
+                loan.status = LoanStatus.paid
+                db.add(loan)
+
+            db.commit()
+        except Exception as e:
+            logger.error(e)
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="something went wrong")
 
 
-def view_loan(loan_id: int):
+def view_loan(loan_id: int) -> models.Loan:
     """
 
-    :param username:
-    :param loan:
+    :param loan_id:
     :return:
     """
     with get_db_session_context() as db:
         loan = CrudMixin.get_loan(db, loan_id)
+        # Making reference to related objects so that they are loaded
+        if loan:
+            _, _ = loan.user, loan.loan_payments
         return loan
 
 
-def get_loans(username: str):
+def get_loans(username: str) -> List[models.Loan]:
+    """
+    Get all loans for the user
+
+    :param username: username
+    :return: List[Loan]
+    """
     with get_db_session_context() as db:
         loans = CrudMixin.get_loans(db, username)
+        _ = [loan.loan_payments for loan in loans]
         return loans
 
 
 def get_payment_list(loan: Loan) -> List[models.LoanPayment]:
     """
+    Utility method to get the payments models for creating a loan.
 
-    :param loan:
-    :return:
+    :param loan: Loan
+    :return: List[models.LoanPayment]
     """
     per_payment = round(loan.amount/loan.tenure, 2)
     today = datetime.date.today()

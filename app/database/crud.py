@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.database import models
-from app.database.models import User, Loan
+from app.database.models import User, Loan, LoanPayment
 
 
 class CrudMixin:
@@ -33,3 +33,13 @@ class CrudMixin:
         user = CrudMixin.get_user(db, username)
         db_loans = db.query(models.Loan).filter(models.Loan.user == user).all()
         return db_loans
+
+    @staticmethod
+    def get_loan_payment(db: Session, loan_id: int, payment_schedule: str) -> LoanPayment:
+        payment = db.query(models.LoanPayment).filter(models.LoanPayment.loan_id == loan_id, models.LoanPayment.payment_schedule == payment_schedule).first()
+        return payment
+
+    @staticmethod
+    def get_pending_payments(db: Session, loan_id: int) -> List[LoanPayment]:
+        pending_payments = db.query(models.LoanPayment).filter(models.LoanPayment.loan_id == loan_id, models.LoanPayment.status == models.PaymentStatus.pending).all()
+        return pending_payments
