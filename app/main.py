@@ -8,8 +8,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.auth.auth import authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, \
-    init_fake_users_db
+from app.auth.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user,
+                           create_access_token, init_fake_users_db)
 from app.auth.dependencies import get_current_user
 from app.database import models
 from app.database.crud import CrudMixin
@@ -18,7 +18,7 @@ from app.database.dependencies import get_db
 from app.database.models import LoanStatus
 from app.handlers import loan_handler
 from app.models.models import Token, User
-from app.models.schema import Loan, LoanResponse, LoanPaymentRequest
+from app.models.schema import Loan, LoanPaymentRequest, LoanResponse
 
 backend = FastAPI()
 models.Base.metadata.create_all(bind=engine)
@@ -52,9 +52,7 @@ async def create_loan(
 
 
 @backend.get("/loans", response_model=List[LoanResponse])
-async def view_loans(
-    current_user: Annotated[User, Depends(get_current_user)]
-):
+async def view_loans(current_user: Annotated[User, Depends(get_current_user)]):
     loans = loan_handler.get_loans(current_user.username)
 
     # If no loans exist return an empty []
@@ -68,43 +66,47 @@ async def view_loans(
                 {
                     "amount": payment.amount,
                     "schedule": str(payment.payment_schedule.date()),
-                    "status": payment.status.value
-                } for payment in loan.loan_payments
-            ]
-        } for loan in loans
+                    "status": payment.status.value,
+                }
+                for payment in loan.loan_payments
+            ],
+        }
+        for loan in loans
     ]
 
 
 @backend.patch("/loan/{loan_id}/approve")
-async def approve_loan(loan_id: int, current_user: Annotated[User, Depends(get_current_user)]):
+async def approve_loan(
+    loan_id: int, current_user: Annotated[User, Depends(get_current_user)]
+):
     if current_user.username != "admin":
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="only admin authorized"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="only admin authorized"
         )
 
     db_loan = loan_handler.view_loan(loan_id)
     if not db_loan:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="loan does not exist"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="loan does not exist"
         )
 
     if db_loan.status in [LoanStatus.approved, LoanStatus.paid]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"message": f"loan is already {db_loan.status.value}"}
+            detail={"message": f"loan is already {db_loan.status.value}"},
         )
 
     loan_handler.approve_loan(loan_id)
 
-    return {
-        "message": "loan approved"
-    }
+    return {"message": "loan approved"}
 
 
 @backend.post("/loan/{loan_id}/payment")
-async def make_loan_payment(loan_id: int, loan_payment: LoanPaymentRequest, current_user: Annotated[User, Depends(get_current_user)]):
+async def make_loan_payment(
+    loan_id: int,
+    loan_payment: LoanPaymentRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
     """
 
     :param loan_id:
@@ -114,42 +116,40 @@ async def make_loan_payment(loan_id: int, loan_payment: LoanPaymentRequest, curr
     db_loan = loan_handler.view_loan(loan_id)
     if not db_loan:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="loan does not exist"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="loan does not exist"
         )
 
     if db_loan.user.username != current_user.username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="loan doesn't belong to current user"
+            detail="loan doesn't belong to current user",
         )
 
     if db_loan.status != LoanStatus.approved:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="loan is not approved"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="loan is not approved"
         )
 
     if db_loan.status == LoanStatus.paid:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="loan is already paid"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="loan is already paid"
         )
 
     pending_loan_payment = [
-        payment for payment in db_loan.loan_payments
+        payment
+        for payment in db_loan.loan_payments
         if str(payment.payment_schedule.date()) == str(loan_payment.schedule)
     ]
     if not pending_loan_payment:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="loan payment not found, check input date"
+            detail="loan payment not found, check input date",
         )
 
     if pending_loan_payment[0].amount > loan_payment.amount:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="amount not sufficient to make payment"
+            detail="amount not sufficient to make payment",
         )
 
     loan_handler.make_payment(db_loan.id, str(loan_payment.schedule))

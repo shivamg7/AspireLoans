@@ -1,10 +1,10 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from starlette import status
 
-from app.auth.auth import oauth2_scheme, SECRET_KEY, ALGORITHM, get_user
+from app.auth.auth import ALGORITHM, SECRET_KEY, get_user, oauth2_scheme
 from app.models.models import TokenData
 
 

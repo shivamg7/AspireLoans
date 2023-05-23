@@ -2,7 +2,7 @@ import datetime
 from typing import Any, List
 
 from pydantic import BaseModel, validator
-from pydantic.datetime_parse import parse_date, get_numeric
+from pydantic.datetime_parse import get_numeric, parse_date
 
 
 def validate_date(v: Any) -> datetime.date:
@@ -17,6 +17,7 @@ class StrictDate(datetime.date):
 
 class Loan(BaseModel):
     """Pydantic model for Loan request body"""
+
     amount: float
     tenure: int
 
@@ -35,8 +36,10 @@ class Loan(BaseModel):
             raise ValueError("tenure must be less than 36 months")
         return tenure
 
+
 class LoanPaymentResponse(BaseModel):
     """"""
+
     amount: float
     schedule: str
     status: str
@@ -44,6 +47,7 @@ class LoanPaymentResponse(BaseModel):
 
 class LoanResponse(BaseModel):
     """Pydantic model for Loan response body"""
+
     amount: float
     tenure: int
     loan_id: int
@@ -53,5 +57,6 @@ class LoanResponse(BaseModel):
 
 class LoanPaymentRequest(BaseModel):
     """"""
+
     amount: float
     schedule: StrictDate

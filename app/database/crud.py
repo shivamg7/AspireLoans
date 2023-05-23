@@ -3,11 +3,10 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.database import models
-from app.database.models import User, Loan, LoanPayment
+from app.database.models import Loan, LoanPayment, User
 
 
 class CrudMixin:
-
     @staticmethod
     def get_user(db: Session, username: str) -> User:
         return db.query(models.User).filter(models.User.username == username).first()
@@ -35,11 +34,27 @@ class CrudMixin:
         return db_loans
 
     @staticmethod
-    def get_loan_payment(db: Session, loan_id: int, payment_schedule: str) -> LoanPayment:
-        payment = db.query(models.LoanPayment).filter(models.LoanPayment.loan_id == loan_id, models.LoanPayment.payment_schedule == payment_schedule).first()
+    def get_loan_payment(
+        db: Session, loan_id: int, payment_schedule: str
+    ) -> LoanPayment:
+        payment = (
+            db.query(models.LoanPayment)
+            .filter(
+                models.LoanPayment.loan_id == loan_id,
+                models.LoanPayment.payment_schedule == payment_schedule,
+            )
+            .first()
+        )
         return payment
 
     @staticmethod
     def get_pending_payments(db: Session, loan_id: int) -> List[LoanPayment]:
-        pending_payments = db.query(models.LoanPayment).filter(models.LoanPayment.loan_id == loan_id, models.LoanPayment.status == models.PaymentStatus.pending).all()
+        pending_payments = (
+            db.query(models.LoanPayment)
+            .filter(
+                models.LoanPayment.loan_id == loan_id,
+                models.LoanPayment.status == models.PaymentStatus.pending,
+            )
+            .all()
+        )
         return pending_payments

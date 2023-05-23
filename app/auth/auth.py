@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from typing import Union
 
 from fastapi.security import OAuth2PasswordBearer
@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 
 from app.database.crud import CrudMixin
 from app.database.dependencies import get_db_session_context
-from app.models.models import UserInDB, TokenData, User
+from app.models.models import TokenData, User, UserInDB
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -42,7 +42,9 @@ def verify_password(plain_text_password: str, hashed_password: str) -> bool:
 def get_user(username: str):
     with get_db_session_context() as db:
         user = CrudMixin.get_user(db, username)
-    return UserInDB(**{"username": user.username, "hashed_password": user.hashed_password})
+    return UserInDB(
+        **{"username": user.username, "hashed_password": user.hashed_password}
+    )
 
 
 def authenticate_user(username: str, password: str):
@@ -76,7 +78,9 @@ def create_user(username: str, password: str) -> None:
         user_exists = CrudMixin.get_user(db, username)
         if user_exists:
             return
-        CrudMixin.create_user(db=db, username=username, hashed_password=get_hashed_password(password))
+        CrudMixin.create_user(
+            db=db, username=username, hashed_password=get_hashed_password(password)
+        )
         db.commit()
 
 

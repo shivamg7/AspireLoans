@@ -12,7 +12,6 @@ from app.database.dependencies import get_db_session_context
 from app.database.models import LoanStatus
 from app.models.schema import Loan
 
-
 logger = logging.getLogger()
 
 
@@ -55,14 +54,19 @@ def approve_loan(loan_id: int) -> None:
         try:
             loan = CrudMixin.get_loan(db=db, loan_id=loan_id)
             if not loan:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="loan not found")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="loan not found"
+                )
             loan.status = LoanStatus.approved
             db.add(loan)
             db.commit()
         except Exception as e:
             logger.error(e)
             db.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="something went wrong")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="something went wrong",
+            )
 
 
 def make_payment(loan_id: int, schedule: str) -> None:
@@ -88,7 +92,10 @@ def make_payment(loan_id: int, schedule: str) -> None:
         except Exception as e:
             logger.error(e)
             db.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="something went wrong")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="something went wrong",
+            )
 
 
 def view_loan(loan_id: int) -> models.Loan:
@@ -125,14 +132,13 @@ def get_payment_list(loan: Loan) -> List[models.LoanPayment]:
     :param loan: Loan
     :return: List[models.LoanPayment]
     """
-    per_payment = round(loan.amount/loan.tenure, 2)
+    per_payment = round(loan.amount / loan.tenure, 2)
     today = datetime.date.today()
     payments = []
     for i in range(0, loan.tenure):
         payments.append(
             models.LoanPayment(
-                amount=per_payment,
-                payment_schedule=today + timedelta(days=7*(i+1))
+                amount=per_payment, payment_schedule=today + timedelta(days=7 * (i + 1))
             )
         )
     return payments
