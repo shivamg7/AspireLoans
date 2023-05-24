@@ -37,6 +37,10 @@ If all payment schedules are paid for a particular loan, the loan itself is mark
 <!-- blank line -->
 
 
+https://github.com/shivamg7/AspireLoans/assets/26554035/a866eb4f-bd39-47ec-a7d2-7a1c0f8201a7
+
+
+
 
 ## Assumptions and decision made during development
 - A pre-populated list of users is hard-coded in the application. This was done to remove the need for users to create accounts and login
