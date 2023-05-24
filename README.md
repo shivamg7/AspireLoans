@@ -11,9 +11,13 @@ Create and manage loans for users.
 - run `docker-compose up -d`
 - verify using `docker ps | grep aspire` you should see two containers running
 
+
 https://github.com/shivamg7/AspireLoans/assets/26554035/a866eb4f-bd39-47ec-a7d2-7a1c0f8201a7
 
 - Navigate to [http://localhost:8000/docs](http://localhost:8000/docs) on your browser to view API docs
+
+https://github.com/shivamg7/AspireLoans/assets/26554035/8f847966-1b18-41d0-83ac-daed7baabb81
+
 
 
 ## API documentation
