@@ -18,7 +18,12 @@ https://github.com/shivamg7/AspireLoans/assets/26554035/a866eb4f-bd39-47ec-a7d2-
 
 https://github.com/shivamg7/AspireLoans/assets/26554035/8f847966-1b18-41d0-83ac-daed7baabb81
 
-
+### Run test cases
+- To run test cases first setup your virtual environment using requirements.txt & requirements-dev.txt
+- Edit the DB connection string to point to a running instance of postgres or you can use SQLite as well
+- ![image](https://github.com/shivamg7/AspireLoans/assets/26554035/e805f7db-f40d-4616-8a76-0cae15d92bc4)
+- run `python -m pytest app/tests/`
+![image](https://github.com/shivamg7/AspireLoans/assets/26554035/3f32541d-8505-4aa0-bea2-ba53b15674a9)
 
 ## API documentation
 
