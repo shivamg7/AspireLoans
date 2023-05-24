@@ -8,10 +8,11 @@ from passlib.context import CryptContext
 
 from app.database.crud import CrudMixin
 from app.database.dependencies import get_db_session_context
-from app.models.models import TokenData, User, UserInDB
+from app.models.models import UserInDB
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# TODO: Below keys need to be fetched from an environment variable to maintain security
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -39,7 +40,13 @@ def verify_password(plain_text_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_text_password, hashed_password)
 
 
-def get_user(username: str):
+def get_user(username: str) -> UserInDB:
+    """
+    Get user from DB.
+
+    :param username:
+    :return:
+    """
     with get_db_session_context() as db:
         user = CrudMixin.get_user(db, username)
     return UserInDB(
@@ -47,7 +54,13 @@ def get_user(username: str):
     )
 
 
-def authenticate_user(username: str, password: str):
+def authenticate_user(username: str, password: str) -> Union[UserInDB, bool]:
+    """
+    Authenticate the user
+    :param username:
+    :param password:
+    :return:
+    """
     user = get_user(username)
     if not user:
         return False
@@ -56,7 +69,14 @@ def authenticate_user(username: str, password: str):
     return user
 
 
-def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
+def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
+    """
+    Create fresh authentication token
+
+    :param data:
+    :param expires_delta:
+    :return:
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -69,6 +89,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 def create_user(username: str, password: str) -> None:
     """
+    Create a new user in DB
 
     :param username:
     :param password:

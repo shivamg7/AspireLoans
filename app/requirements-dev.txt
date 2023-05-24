@@ -2,3 +2,4 @@ httpx
 pytest
 black
 isort
+coverage

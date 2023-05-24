@@ -30,7 +30,12 @@ If all payment schedules are paid for a particular loan, the loan itself is mark
 - cd to the root of the project
 - run `docker-compose up -d`
 - verify using `docker ps | grep aspire` you should see two containers running
-- Navigate to [localhost:8000/docs](http://localhost:8000/docs) on your browser
+<!-- blank line -->
+<figure class="video_container">
+  <iframe src="https://youtu.be/pJBwpx5qvfM" frameborder="0" allowfullscreen="true"> </iframe>
+</figure>
+<!-- blank line -->
+
 
 
 ## Assumptions and decision made during development

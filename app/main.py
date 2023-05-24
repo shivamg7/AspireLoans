@@ -1,20 +1,14 @@
-import datetime
-import logging
 from datetime import timedelta
 from typing import Annotated, List
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
 from app.auth.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user,
                            create_access_token, init_fake_users_db)
 from app.auth.dependencies import get_current_user
 from app.database import models
-from app.database.crud import CrudMixin
 from app.database.db import engine
-from app.database.dependencies import get_db
 from app.database.models import LoanStatus
 from app.handlers import loan_handler
 from app.models.models import Token, User

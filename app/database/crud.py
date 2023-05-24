@@ -7,6 +7,8 @@ from app.database.models import Loan, LoanPayment, User
 
 
 class CrudMixin:
+    """Helper methods for DB operations"""
+
     @staticmethod
     def get_user(db: Session, username: str) -> User:
         return db.query(models.User).filter(models.User.username == username).first()

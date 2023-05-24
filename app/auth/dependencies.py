@@ -9,6 +9,12 @@ from app.models.models import TokenData
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """
+    Authentication dependency to authentication and fetch the current logged in user
+
+    :param token:
+    :return:
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

@@ -8,12 +8,14 @@ from app.database.db import Base
 
 
 class LoanStatus(enum.Enum):
+    """Status for Loan"""
     approved = "approved"
     pending = "pending"
     paid = "paid"
 
 
 class PaymentStatus(enum.Enum):
+    """Status for individual loan payments"""
     pending = "pending"
     paid = "paid"
 
@@ -29,7 +31,7 @@ class User(Base):
 
     loans = relationship("Loan", back_populates="user")
 
-    __tablename__ = "user"  # #
+    __tablename__ = "user"
 
 
 class Loan(Base):
